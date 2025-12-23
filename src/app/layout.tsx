@@ -10,7 +10,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Budget Tracker",
-  description: "Track your income, expenses, and budgets",
+  description: "Track your income, expenses, and budgets with AI-powered categorization",
 };
 
 export default function RootLayout({
@@ -21,38 +21,44 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased`}>
-        <div className="min-h-screen bg-gray-50">
-          <nav className="border-b bg-white">
+        <div className="min-h-screen">
+          <nav className="sticky top-0 z-50 glass glass-border backdrop-blur-glass">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <div className="flex h-16 items-center justify-between">
                 <div className="flex items-center gap-8">
-                  <Link href="/" className="text-xl font-bold">
+                  <Link href="/" className="text-xl font-bold gradient-purple bg-clip-text text-transparent">
                     Budget Tracker
                   </Link>
-                  <div className="hidden md:flex gap-4">
+                  <div className="hidden md:flex gap-1">
                     <Link
                       href="/"
-                      className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                      className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-all"
                     >
                       Dashboard
                     </Link>
                     <Link
                       href="/transactions"
-                      className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                      className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-all"
                     >
                       Transactions
                     </Link>
                     <Link
                       href="/budgets"
-                      className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                      className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-all"
                     >
                       Budgets
                     </Link>
                     <Link
                       href="/reports"
-                      className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                      className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-all"
                     >
                       Reports
+                    </Link>
+                    <Link
+                      href="/import"
+                      className="px-4 py-2 text-sm font-medium text-accent-primary hover:bg-accent-primary/10 rounded-lg transition-all"
+                    >
+                      Import
                     </Link>
                   </div>
                 </div>

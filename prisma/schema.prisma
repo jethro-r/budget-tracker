@@ -17,10 +17,11 @@ model User {
   name      String
   createdAt DateTime @default(now())
 
-  categories           Category[]
-  transactions         Transaction[]
-  budgets              Budget[]
+  categories            Category[]
+  transactions          Transaction[]
+  budgets               Budget[]
   recurringTransactions RecurringTransaction[]
+  categoryRules         CategoryRule[]
 
   @@map("users")
 }
@@ -39,10 +40,11 @@ model Category {
   color     String          // Hex color for UI
   createdAt DateTime        @default(now())
 
-  user                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions         Transaction[]
-  budgets              Budget[]
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions          Transaction[]
+  budgets               Budget[]
   recurringTransactions RecurringTransaction[]
+  categoryRules         CategoryRule[]
 
   @@unique([userId, name])
   @@map("categories")
@@ -50,23 +52,27 @@ model Category {
 
 // Individual income/expense entries
 model Transaction {
-  id                    String          @id @default(uuid())
-  amount                Decimal         @db.Decimal(10, 2)
-  type                  TransactionType
-  categoryId            String
-  description           String
-  date                  DateTime
-  userId                String
+  id                     String          @id @default(uuid())
+  amount                 Decimal         @db.Decimal(10, 2)
+  type                   TransactionType
+  categoryId             String
+  description            String
+  date                   DateTime
+  userId                 String
   recurringTransactionId String?
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
+  importSource           String?         // "anz-csv", "manual", "recurring"
+  importId               String?         // Unique ID from import source
+  originalDesc           String?         // Original description for AI learning
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
 
-  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category            Category              @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category             Category              @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   recurringTransaction RecurringTransaction? @relation(fields: [recurringTransactionId], references: [id], onDelete: SetNull)
 
   @@index([userId, date])
   @@index([categoryId])
+  @@index([importSource, importId])
   @@map("transactions")
 }
 
@@ -122,4 +128,22 @@ model RecurringTransaction {
 
   @@index([userId, isActive])
   @@map("recurring_transactions")
+}
+
+// AI categorization rules
+model CategoryRule {
+  id          String   @id @default(uuid())
+  pattern     String   // Regex pattern or exact match
+  categoryId  String
+  userId      String
+  confidence  Float    @default(1.0)
+  createdFrom String   // "user_defined", "ai_learned", "system_default"
+  matchCount  Int      @default(0) // How many times this rule matched
+  createdAt   DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("category_rules")
 }

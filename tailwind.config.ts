@@ -9,51 +9,36 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+        bg: {
+          primary: "rgb(var(--bg-primary))",
+          secondary: "rgb(var(--bg-secondary))",
+          tertiary: "rgb(var(--bg-tertiary))",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          primary: "rgb(var(--accent-primary))",
+          secondary: "rgb(var(--accent-secondary))",
+          success: "rgb(var(--accent-success))",
+          danger: "rgb(var(--accent-danger))",
+          warning: "rgb(var(--accent-warning))",
         },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        chart: {
-          "1": "hsl(var(--chart-1))",
-          "2": "hsl(var(--chart-2))",
-          "3": "hsl(var(--chart-3))",
-          "4": "hsl(var(--chart-4))",
-          "5": "hsl(var(--chart-5))",
+        text: {
+          primary: "rgb(var(--text-primary))",
+          secondary: "rgb(var(--text-secondary))",
+          muted: "rgb(var(--text-muted))",
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        sm: "var(--radius-sm)",
+        md: "var(--radius-md)",
+        lg: "var(--radius-lg)",
+        xl: "var(--radius-xl)",
+      },
+      boxShadow: {
+        glow: "0 0 20px rgba(var(--glow), var(--glow-opacity))",
+        "glow-lg": "0 0 40px rgba(var(--glow), 0.5)",
+      },
+      backdropBlur: {
+        glass: "20px",
       },
     },
   },
