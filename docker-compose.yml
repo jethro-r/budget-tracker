@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: budget-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - budget_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  budget-tracker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: budget-tracker
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+    networks:
+      - budget_net
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.finance.rule=Host(`finance.readj.dev`)"
+      - "traefik.http.routers.finance.entrypoints=web"
+      - "traefik.http.routers.finance.service=finance"
+      - "traefik.http.services.finance.loadbalancer.server.port=3000"
+      - "traefik.http.routers.finance.middlewares=authentik@file,secure-headers@file,compress@file"
+      - "traefik.docker.network=proxy"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  budget_net:
+    name: budget_net
+    driver: bridge
+  proxy:
+    external: true
+
+volumes:
+  postgres_data:
+    name: budget_postgres_data

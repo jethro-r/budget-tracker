@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User synced from Authentik headers
+model User {
+  id        String   @id // Authentik UID
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  categories           Category[]
+  transactions         Transaction[]
+  budgets              Budget[]
+  recurringTransactions RecurringTransaction[]
+
+  @@map("users")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+// Budget categories (Groceries, Entertainment, etc.)
+model Category {
+  id        String          @id @default(uuid())
+  name      String
+  type      TransactionType
+  userId    String
+  color     String          // Hex color for UI
+  createdAt DateTime        @default(now())
+
+  user                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions         Transaction[]
+  budgets              Budget[]
+  recurringTransactions RecurringTransaction[]
+
+  @@unique([userId, name])
+  @@map("categories")
+}
+
+// Individual income/expense entries
+model Transaction {
+  id                    String          @id @default(uuid())
+  amount                Decimal         @db.Decimal(10, 2)
+  type                  TransactionType
+  categoryId            String
+  description           String
+  date                  DateTime
+  userId                String
+  recurringTransactionId String?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category            Category              @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  recurringTransaction RecurringTransaction? @relation(fields: [recurringTransactionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([categoryId])
+  @@map("transactions")
+}
+
+enum BudgetPeriod {
+  MONTHLY
+  YEARLY
+}
+
+// Monthly/yearly budget limits per category
+model Budget {
+  id             String       @id @default(uuid())
+  categoryId     String
+  amount         Decimal      @db.Decimal(10, 2)
+  period         BudgetPeriod
+  startDate      DateTime
+  endDate        DateTime?
+  userId         String
+  alertThreshold Int          @default(80) // Percentage (80, 90, 100)
+  createdAt      DateTime     @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId, startDate])
+  @@map("budgets")
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+// Template for recurring transactions
+model RecurringTransaction {
+  id            String          @id @default(uuid())
+  amount        Decimal         @db.Decimal(10, 2)
+  type          TransactionType
+  categoryId    String
+  description   String
+  frequency     Frequency
+  startDate     DateTime
+  endDate       DateTime?
+  lastProcessed DateTime?
+  isActive      Boolean         @default(true)
+  userId        String
+  createdAt     DateTime        @default(now())
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category     Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([userId, isActive])
+  @@map("recurring_transactions")
+}
