@@ -15,16 +15,48 @@
     --accent-danger: 239 68 68;     /* #ef4444 - Red for expenses */
     --accent-warning: 245 158 11;   /* #f59e0b - Orange for alerts */
 
+    /* Status colors */
+    --status-info: 59 130 246;      /* #3b82f6 - Blue for info */
+    --status-alert: 234 179 8;      /* #eab308 - Amber for alerts */
+
     /* Text colors */
     --text-primary: 249 250 251;    /* #f9fafb - Primary text */
     --text-secondary: 156 163 175;  /* #9ca3af - Secondary text */
     --text-muted: 107 114 128;      /* #6b7280 - Muted text */
+
+    /* Chart colors for Recharts */
+    --chart-1: 139 92 246;          /* Purple */
+    --chart-2: 6 182 212;           /* Cyan */
+    --chart-3: 16 185 129;          /* Green */
+    --chart-4: 239 68 68;           /* Red */
+    --chart-5: 245 158 11;          /* Orange */
+    --chart-6: 236 72 153;          /* Pink */
+    --chart-7: 99 102 241;          /* Indigo */
+    --chart-8: 168 85 247;          /* Purple variant */
 
     /* UI elements */
     --border: 255 255 255;          /* White with opacity */
     --border-opacity: 0.1;
     --glow: 139 92 246;             /* Purple glow */
     --glow-opacity: 0.3;
+
+    /* Focus states for accessibility */
+    --focus-ring: var(--accent-primary);
+    --focus-ring-offset: var(--bg-primary);
+
+    /* Elevation/Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+
+    /* Z-index scale */
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-toast: 1060;
 
     /* Radius */
     --radius-sm: 0.5rem;
@@ -83,6 +115,43 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+  }
+
+  /* Enhanced focus styles for accessibility */
+  *:focus-visible {
+    outline: 2px solid rgb(var(--accent-primary));
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+  }
+
+  /* Skip to main content link */
+  .skip-to-main {
+    position: absolute;
+    top: -100px;
+    left: 0;
+    background: rgb(var(--accent-primary));
+    color: white;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    z-index: 9999;
+    border-radius: 0.25rem;
+  }
+
+  .skip-to-main:focus {
+    top: 0;
+  }
+
+  /* Screen reader only */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
   }
 
   /* Tabular numbers for financial data */

@@ -1,64 +1,145 @@
+'use client';
+
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { TrendingUp, TrendingDown, DollarSign, Upload, Plus, Target, Sparkles } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ANZImportDialog } from "@/components/import/anz-import-dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { CardSkeleton } from "@/components/ui/skeleton";
+import { pageTransition, staggerContainer, fadeInUp } from '@/lib/animations';
+
+// Dynamic imports for charts (code splitting for better performance)
+const Sparkline = dynamic(
+  () => import('@/components/charts/sparkline').then(mod => ({ default: mod.Sparkline })),
+  { ssr: false }
+);
+
+const SpendingByCategory = dynamic(
+  () => import('@/components/charts/spending-by-category').then(mod => ({ default: mod.SpendingByCategory })),
+  { loading: () => <CardSkeleton />, ssr: false }
+);
+
+const IncomeVsExpense = dynamic(
+  () => import('@/components/charts/income-vs-expense').then(mod => ({ default: mod.IncomeVsExpense })),
+  { loading: () => <CardSkeleton />, ssr: false }
+);
 
 export default function HomePage() {
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+
+  // Sample data for demonstration (replace with real data from API)
+  const sampleIncomeData = [1200, 1400, 1100, 1600, 1800, 1500, 2000];
+  const sampleExpenseData = [800, 950, 700, 1200, 1100, 900, 1000];
+  const sampleCategoryData = [
+    { name: 'Groceries', value: 450 },
+    { name: 'Transportation', value: 200 },
+    { name: 'Entertainment', value: 150 },
+    { name: 'Utilities', value: 300 },
+    { name: 'Dining Out', value: 180 },
+  ];
+  const sampleMonthlyData = [
+    { month: 'Jul', income: 3500, expenses: 2400 },
+    { month: 'Aug', income: 3800, expenses: 2600 },
+    { month: 'Sep', income: 3200, expenses: 2200 },
+    { month: 'Oct', income: 4100, expenses: 2800 },
+    { month: 'Nov', income: 3900, expenses: 2500 },
+    { month: 'Dec', income: 4300, expenses: 3100 },
+  ];
+
   return (
-    <div className="space-y-8 animate-fade-in">
+    <motion.div
+      variants={pageTransition}
+      initial="initial"
+      animate="animate"
+      className="space-y-8"
+    >
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold bg-gradient-to-r from-accent-primary to-accent-secondary bg-clip-text text-transparent">
           Dashboard
         </h1>
-        <p className="text-text-secondary mt-2">Welcome to your financial command center</p>
+        <p className="text-[rgb(var(--text-secondary))] mt-2">Welcome to your financial command center</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="card-hover">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-text-secondary">
-              Total Income
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-income tabular-nums">$0.00</div>
-            <p className="text-xs text-text-muted mt-2">This month</p>
-            <div className="mt-4 h-2 bg-bg-tertiary rounded-full overflow-hidden">
-              <div className="h-full gradient-success" style={{width: '0%'}}></div>
-            </div>
-          </CardContent>
-        </Card>
+      <motion.div
+        variants={staggerContainer(0.1)}
+        initial="hidden"
+        animate="visible"
+        className="grid gap-6 md:grid-cols-3"
+      >
+        <motion.div variants={fadeInUp}>
+          <Card className="card-hover">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-[rgb(var(--text-secondary))]">
+                  Total Income
+                </CardTitle>
+                <TrendingUp className="w-5 h-5 text-[rgb(var(--accent-success))]" aria-hidden="true" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-income tabular-nums">$2,000.00</div>
+              <p className="text-xs text-[rgb(var(--text-muted))] mt-2">This month</p>
+              <div className="mt-4">
+                <Sparkline data={sampleIncomeData} color="rgb(var(--accent-success))" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card className="card-hover">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-text-secondary">
-              Total Expenses
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-expense tabular-nums">$0.00</div>
-            <p className="text-xs text-text-muted mt-2">This month</p>
-            <div className="mt-4 h-2 bg-bg-tertiary rounded-full overflow-hidden">
-              <div className="h-full gradient-danger" style={{width: '0%'}}></div>
-            </div>
-          </CardContent>
-        </Card>
+        <motion.div variants={fadeInUp}>
+          <Card className="card-hover">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-[rgb(var(--text-secondary))]">
+                  Total Expenses
+                </CardTitle>
+                <TrendingDown className="w-5 h-5 text-[rgb(var(--accent-danger))]" aria-hidden="true" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-expense tabular-nums">$1,000.00</div>
+              <p className="text-xs text-[rgb(var(--text-muted))] mt-2">This month</p>
+              <div className="mt-4">
+                <Sparkline data={sampleExpenseData} color="rgb(var(--accent-danger))" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card className="card-hover border-accent-primary/20">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-text-secondary">
-              Net Income
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold gradient-purple bg-clip-text text-transparent tabular-nums">
-              $0.00
-            </div>
-            <p className="text-xs text-text-muted mt-2">This month</p>
-            <div className="mt-4 h-2 bg-bg-tertiary rounded-full overflow-hidden">
-              <div className="h-full gradient-purple" style={{width: '50%'}}></div>
-            </div>
-          </CardContent>
-        </Card>
+        <motion.div variants={fadeInUp}>
+          <Card className="card-hover border-[rgba(var(--accent-primary),0.2)]">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-[rgb(var(--text-secondary))]">
+                  Net Income
+                </CardTitle>
+                <DollarSign className="w-5 h-5 text-[rgb(var(--accent-primary))]" aria-hidden="true" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold gradient-purple bg-clip-text text-transparent tabular-nums">
+                $1,000.00
+              </div>
+              <p className="text-xs text-[rgb(var(--text-muted))] mt-2">This month</p>
+              <div className="mt-4">
+                <Sparkline
+                  data={sampleIncomeData.map((income, i) => income - sampleExpenseData[i])}
+                  color="rgb(var(--accent-primary))"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
+
+      {/* Charts Grid */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SpendingByCategory data={sampleCategoryData} />
+        <IncomeVsExpense data={sampleMonthlyData} />
       </div>
 
       {/* Main Content Grid */}
@@ -68,100 +149,66 @@ export default function HomePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               Recent Transactions
-              <span className="text-sm font-normal text-text-muted">
+              <span className="text-sm font-normal text-[rgb(var(--text-muted))]">
                 (0 transactions)
               </span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-16 h-16 rounded-full bg-bg-tertiary flex items-center justify-center mb-4">
-                <svg className="w-8 h-8 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </div>
-              <p className="text-text-secondary mb-4">
-                No transactions yet
-              </p>
-              <p className="text-sm text-text-muted max-w-md">
-                Start by importing your ANZ bank statements or manually add transactions to see your financial activity here
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Budget Overview */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Budget Overview
-              <span className="text-sm font-normal text-text-muted">
-                (0 budgets)
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-14 h-14 rounded-full bg-bg-tertiary flex items-center justify-center mb-3">
-                <svg className="w-7 h-7 text-accent-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <p className="text-text-secondary mb-2 text-sm">
-                No budgets set
-              </p>
-              <p className="text-xs text-text-muted max-w-xs">
-                Create budgets to track spending limits and get alerts
-              </p>
-            </div>
+            <EmptyState
+              icon={Plus}
+              title="No transactions yet"
+              description="Start by importing your ANZ bank statements or manually add transactions to see your financial activity here"
+              action={{
+                label: "Import Transactions",
+                onClick: () => setImportDialogOpen(true)
+              }}
+            />
           </CardContent>
         </Card>
 
         {/* Quick Actions */}
-        <Card className="border-accent-primary/10">
+        <Card className="border-[rgba(var(--accent-primary),0.1)]">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <button className="w-full px-4 py-3 rounded-lg bg-bg-tertiary hover:bg-accent-primary/10 border border-accent-primary/20 hover:border-accent-primary/40 text-left group transition-all">
+              <button
+                onClick={() => setImportDialogOpen(true)}
+                className="w-full px-4 py-3 rounded-lg bg-[rgb(var(--bg-tertiary))] hover:bg-[rgba(var(--accent-primary),0.1)] border border-[rgba(var(--accent-primary),0.2)] hover:border-[rgba(var(--accent-primary),0.4)] text-left group transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--accent-primary))]"
+              >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-accent-primary/10 group-hover:bg-accent-primary/20 flex items-center justify-center transition-all">
-                    <svg className="w-5 h-5 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
+                  <div className="w-10 h-10 rounded-lg bg-[rgba(var(--accent-primary),0.1)] group-hover:bg-[rgba(var(--accent-primary),0.2)] flex items-center justify-center transition-all">
+                    <Upload className="w-5 h-5 text-[rgb(var(--accent-primary))]" aria-hidden="true" />
                   </div>
                   <div>
-                    <div className="font-medium text-text-primary">Import ANZ Transactions</div>
-                    <div className="text-xs text-text-muted">Upload CSV from your bank</div>
+                    <div className="font-medium text-[rgb(var(--text-primary))]">Import ANZ Transactions</div>
+                    <div className="text-xs text-[rgb(var(--text-muted))]">Upload CSV from your bank</div>
                   </div>
                 </div>
               </button>
 
-              <button className="w-full px-4 py-3 rounded-lg bg-bg-tertiary hover:bg-accent-success/10 border border-white/5 hover:border-accent-success/20 text-left group transition-all">
+              <button className="w-full px-4 py-3 rounded-lg bg-[rgb(var(--bg-tertiary))] hover:bg-[rgba(var(--accent-success),0.1)] border border-[rgba(var(--border),0.05)] hover:border-[rgba(var(--accent-success),0.2)] text-left group transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--accent-success))]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-accent-success/10 group-hover:bg-accent-success/20 flex items-center justify-center transition-all">
-                    <svg className="w-5 h-5 text-accent-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
+                  <div className="w-10 h-10 rounded-lg bg-[rgba(var(--accent-success),0.1)] group-hover:bg-[rgba(var(--accent-success),0.2)] flex items-center justify-center transition-all">
+                    <Plus className="w-5 h-5 text-[rgb(var(--accent-success))]" aria-hidden="true" />
                   </div>
                   <div>
-                    <div className="font-medium text-text-primary">Add Transaction</div>
-                    <div className="text-xs text-text-muted">Manually log income or expense</div>
+                    <div className="font-medium text-[rgb(var(--text-primary))]">Add Transaction</div>
+                    <div className="text-xs text-[rgb(var(--text-muted))]">Manually log income or expense</div>
                   </div>
                 </div>
               </button>
 
-              <button className="w-full px-4 py-3 rounded-lg bg-bg-tertiary hover:bg-accent-warning/10 border border-white/5 hover:border-accent-warning/20 text-left group transition-all">
+              <button className="w-full px-4 py-3 rounded-lg bg-[rgb(var(--bg-tertiary))] hover:bg-[rgba(var(--accent-warning),0.1)] border border-[rgba(var(--border),0.05)] hover:border-[rgba(var(--accent-warning),0.2)] text-left group transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--accent-warning))]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-accent-warning/10 group-hover:bg-accent-warning/20 flex items-center justify-center transition-all">
-                    <svg className="w-5 h-5 text-accent-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
+                  <div className="w-10 h-10 rounded-lg bg-[rgba(var(--accent-warning),0.1)] group-hover:bg-[rgba(var(--accent-warning),0.2)] flex items-center justify-center transition-all">
+                    <Target className="w-5 h-5 text-[rgb(var(--accent-warning))]" aria-hidden="true" />
                   </div>
                   <div>
-                    <div className="font-medium text-text-primary">Create Budget</div>
-                    <div className="text-xs text-text-muted">Set spending limits by category</div>
+                    <div className="font-medium text-[rgb(var(--text-primary))]">Create Budget</div>
+                    <div className="text-xs text-[rgb(var(--text-muted))]">Set spending limits by category</div>
                   </div>
                 </div>
               </button>
@@ -174,19 +221,33 @@ export default function HomePage() {
       <Card className="gradient-purple relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
         <CardContent className="relative py-8">
-          <div className="max-w-2xl">
-            <h3 className="text-xl font-bold text-white mb-2">
-              AI-Powered Categorization
-            </h3>
-            <p className="text-white/80 text-sm mb-4">
-              Our intelligent system automatically categorizes your transactions using AI and learns from your corrections over time
-            </p>
-            <button className="px-6 py-2 bg-white text-accent-primary rounded-lg hover:bg-white/90 transition-all font-medium shadow-lg">
-              Learn More
-            </button>
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-6 h-6 text-white" aria-hidden="true" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-white mb-2">
+                AI-Powered Categorization
+              </h3>
+              <p className="text-white/80 text-sm mb-4">
+                Our intelligent system automatically categorizes your transactions using AI and learns from your corrections over time
+              </p>
+              <button className="px-6 py-2 bg-white text-[rgb(var(--accent-primary))] rounded-lg hover:bg-white/90 transition-all font-medium shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--accent-primary))]">
+                Learn More
+              </button>
+            </div>
           </div>
         </CardContent>
       </Card>
-    </div>
+
+      <ANZImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onSuccess={() => {
+          // Refresh page data here if needed
+          window.location.reload();
+        }}
+      />
+    </motion.div>
   );
 }
